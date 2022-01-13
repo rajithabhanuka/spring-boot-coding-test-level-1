@@ -1,7 +1,9 @@
 package com.codejam.demo.model;
 
+import com.codejam.demo.dto.PersonalInformationDto;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.BeanUtils;
 
 import javax.persistence.*;
 
@@ -21,7 +23,15 @@ public class PersonalInformationEntity {
     @Column(name = "idol_name")
     private String idolName;
 
-    @Column(name = "date_time")
+    @Column(name = "address")
     private String dateTime;
 
+    @Column(name = "idol_status")
+    private String idolStatus;
+
+    public PersonalInformationDto toDto() {
+        PersonalInformationDto dto = new PersonalInformationDto();
+        BeanUtils.copyProperties(this, dto);
+        return dto;
+    }
 }
