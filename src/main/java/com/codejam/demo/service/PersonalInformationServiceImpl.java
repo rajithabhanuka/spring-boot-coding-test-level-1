@@ -3,6 +3,8 @@ package com.codejam.demo.service;
 import com.codejam.demo.dto.PersonalInformationDto;
 import com.codejam.demo.dto.ResponseDto;
 import com.codejam.demo.dto.TodoDto;
+import com.codejam.demo.exception.DataNotFoundException;
+import com.codejam.demo.exception.ExternalCallException;
 import com.codejam.demo.model.PersonalInformationEntity;
 import com.codejam.demo.model.TodoEntity;
 import com.codejam.demo.repository.PersonalInformationRepository;
@@ -34,7 +36,6 @@ public class PersonalInformationServiceImpl implements PersonalInformationServic
     }
 
     /**
-     *
      * @param dto json object for personal details
      * @return a success response object with status message
      */
@@ -66,7 +67,8 @@ public class PersonalInformationServiceImpl implements PersonalInformationServic
 
         log.info("INVOKED PERSONAL DETAILS GET METHOD");
 
-        PersonalInformationEntity entity = personalInformationRepository.findById(id).get();
+        PersonalInformationEntity entity = personalInformationRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Record can not be found", String.valueOf(id)));
 
         log.info("COMPLETED PERSONAL DETAILS GET METHOD");
 
@@ -74,7 +76,6 @@ public class PersonalInformationServiceImpl implements PersonalInformationServic
     }
 
     /**
-     *
      * @param dto json object for personal details
      * @return a success response object with status message
      */
@@ -84,14 +85,20 @@ public class PersonalInformationServiceImpl implements PersonalInformationServic
 
         log.info("INVOKED PERSONAL DETAILS UPDATING METHOD");
 
-        PersonalInformationEntity entity = personalInformationRepository.findById(dto.getId()).get();
+        PersonalInformationEntity entity = personalInformationRepository.findById(dto.getId())
+                .orElseThrow(() -> new DataNotFoundException("Record can not be found", String.valueOf(dto.getId())));
+
+        entity.setDateTime(dto.getDateTime());
+        entity.setId(dto.getId());
+        entity.setIdolName(dto.getIdolName());
+        entity.setIdolStatus(dto.getIdolStatus());
+        entity.setRealName(dto.getRealName());
 
         TodoDto todoDto = getTodoDto(dto);
-        entity = dto.toEntity();
-
-        TodoEntity todoEntity = todoDto.toEntity();
+        TodoEntity todoEntity = todoDto != null ? todoDto.toEntity() : null;
 
         personalInformationRepository.save(entity);
+        assert todoEntity != null;
         todoRepository.save(todoEntity);
 
         log.info("COMPLETED PERSONAL DETAILS UPDATING METHOD");
@@ -119,12 +126,12 @@ public class PersonalInformationServiceImpl implements PersonalInformationServic
     }
 
     /**
-     *
      * @param dto json object for personal details
      * @return a todo object with status message
      */
     private TodoDto getTodoDto(PersonalInformationDto dto) {
-        TodoDto todoDto = null;
+
+        TodoDto todoDto;
 
         // From java 11 we can use webclient instead of rest template
         RestTemplate restTemplate = new RestTemplate();
@@ -133,8 +140,9 @@ public class PersonalInformationServiceImpl implements PersonalInformationServic
             todoDto = restTemplate
                     .getForObject(url.concat("/".concat(String.valueOf(dto.getTodoId()))), TodoDto.class);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("ERROR WHILE PERSONAL DETAILS SAVING METHOD");
+            throw new ExternalCallException("Error occurred while getting data", url);
         }
         return todoDto;
     }
