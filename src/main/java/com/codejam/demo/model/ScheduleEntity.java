@@ -9,23 +9,20 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(name = "user", schema = "testdb")
-public class UserEntity {
+@Table(name = "SCHEDULE", schema = "testdb")
+public class ScheduleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "venue")
+    private String venue;
 
-    @Column(name = "age")
-    private Integer age;
+    @Column(name = "event_name")
+    private String eventName;
 
     @Column(name = "country")
     private String country;
-
-    @OneToMany(mappedBy="user")
-    private Set<IdolEntity> idols;
 
 }
