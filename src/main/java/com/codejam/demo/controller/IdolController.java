@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/idol")
@@ -34,6 +35,14 @@ public class IdolController {
             @PathVariable(value = "id") Integer id
     ) {
         return personalInformationService.get(id);
+    }
+
+    @GetMapping(path = "users")
+    public ResponseEntity<List<PersonalInformationDto>> getAll(
+            @RequestParam(value = "pageNumber") Integer pageNumber,
+            @RequestParam(value = "pageSize") Integer pageSize
+    ) {
+        return personalInformationService.get(pageNumber, pageSize);
     }
 
     @PutMapping(path = "/users", consumes = MediaType.APPLICATION_JSON_VALUE,

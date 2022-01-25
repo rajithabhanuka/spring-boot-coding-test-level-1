@@ -12,11 +12,17 @@ import com.codejam.demo.repository.TodoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -147,4 +153,24 @@ public class PersonalInformationServiceImpl implements PersonalInformationServic
         return todoDto;
     }
 
+    @Override
+    public ResponseEntity<List<PersonalInformationDto>> get(Integer pageNumber, Integer pageSize) {
+
+        Page<PersonalInformationEntity> page = personalInformationRepository
+                .findAll(PageRequest.of(pageNumber, pageSize));
+
+        List<PersonalInformationDto> dtos = page
+                .getContent()
+                .stream().map(PersonalInformationEntity::toDto)
+                .collect(Collectors.toList());
+
+//        Iterable<PersonalInformationEntity> personalInformationDtos =
+//                personalInformationRepository.findAll();
+//
+//        for (PersonalInformationEntity entity: personalInformationDtos){
+//            dtos.add(entity.toDto());
+//        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(dtos);
+    }
 }
